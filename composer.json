@@ -1,0 +1,22 @@
+{
+    "name": "minond/restful",
+    "description": "RESTful router",
+    "authors": [
+        {
+            "name": "Marcos Minond",
+            "email": "minond.marcos@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "minond/http": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "Efficio": "src/"
+        }
+    },
+    "require-dev": {
+        "minond/model": "dev-master"
+    }
+}

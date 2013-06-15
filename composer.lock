@@ -1,0 +1,94 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "1b40b790a51dd71099ef4efa27082ad2",
+    "packages": [
+        {
+            "name": "minond/http",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/minond/Http.git",
+                "reference": "bffcd553468f23c5c617bcfb7576d7dcef2bc07e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/minond/Http/zipball/bffcd553468f23c5c617bcfb7576d7dcef2bc07e",
+                "reference": "bffcd553468f23c5c617bcfb7576d7dcef2bc07e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "minond/model": "dev-master"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Efficio": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Marcos Minond",
+                    "email": "minond.marcos@gmail.com"
+                }
+            ],
+            "description": "Http/routing helpers",
+            "time": "2013-06-11 05:15:28"
+        }
+    ],
+    "packages-dev": [
+        {
+            "name": "minond/model",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/minond/Model.git",
+                "reference": "f858c349047b7f9a021715a88a29536158fa8ad7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/minond/Model/zipball/f858c349047b7f9a021715a88a29536158fa8ad7",
+                "reference": "f858c349047b7f9a021715a88a29536158fa8ad7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Efficio": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Marcos Minond",
+                    "email": "minond.marcos@gmail.com"
+                }
+            ],
+            "description": "Object models",
+            "time": "2013-06-10 01:40:37"
+        }
+    ],
+    "aliases": [
+
+    ],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "minond/http": 20,
+        "minond/model": 20
+    },
+    "platform": {
+        "php": ">=5.3.0"
+    },
+    "platform-dev": [
+
+    ]
+}
