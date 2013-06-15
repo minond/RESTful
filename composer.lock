@@ -11,19 +11,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minond/Http.git",
-                "reference": "bffcd553468f23c5c617bcfb7576d7dcef2bc07e"
+                "reference": "c39cd25f65a14a066fe8745152fae640372e0d51"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minond/Http/zipball/bffcd553468f23c5c617bcfb7576d7dcef2bc07e",
-                "reference": "bffcd553468f23c5c617bcfb7576d7dcef2bc07e",
+                "url": "https://api.github.com/repos/minond/Http/zipball/c39cd25f65a14a066fe8745152fae640372e0d51",
+                "reference": "c39cd25f65a14a066fe8745152fae640372e0d51",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "minond/model": "dev-master"
             },
             "type": "library",
             "autoload": {
@@ -38,8 +35,8 @@
                     "email": "minond.marcos@gmail.com"
                 }
             ],
-            "description": "Http/routing helpers",
-            "time": "2013-06-11 05:15:28"
+            "description": "Http helpers",
+            "time": "2013-06-15 16:51:10"
         }
     ],
     "packages-dev": [
