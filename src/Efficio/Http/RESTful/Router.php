@@ -2,6 +2,8 @@
 
 namespace Efficio\Http\RESTful;
 
+use Efficio\Http\Verb;
+
 /**
  * @link http://en.wikipedia.org/wiki/Representational_state_transfer
  *
@@ -37,14 +39,6 @@ class Router
     const CREATE_ONE = 'create';
     const SAVE_ONE = 'save';
     const GET_ID = 'getId';
-
-    /**
-     * supported request methods
-     */
-    const POST = 'POST';
-    const GET = 'GET';
-    const PUT = 'PUT';
-    const DEL = 'DELETE';
 
     /**
      * base api url
@@ -107,21 +101,21 @@ class Router
      * @param array
      */
     private static $internals = [
-        self::GET => [
+        Verb::GET => [
             true  => 'handlerFindOneById',
             false => 'handlerFindBy',
         ],
 
-        self::PUT => [
+        Verb::PUT => [
             true  => 'handlerUpdate',
             false => 'handlerCreate',
         ],
 
-        self::POST => [
+        Verb::POST => [
             false => 'handlerCreate',
         ],
 
-        self::DEL => [
+        Verb::DEL => [
             true  => 'handlerDeleteOneById',
             false => 'handlerDeleteBy',
         ],
@@ -250,7 +244,7 @@ class Router
      */
     public function method($method)
     {
-        $methods = [ self::POST, self::GET, self::PUT, self::DEL ];
+        $methods = [ Verb::POST, Verb::GET, Verb::PUT, Verb::DEL ];
 
         if (!in_array($method, $methods)) {
             throw new \InvalidArgumentException(sprintf(
