@@ -2,7 +2,9 @@
 
 namespace Efficio\Http\RESTful;
 
+use Exception;
 use Efficio\Http\Verb;
+use Efficio\Http\Request;
 
 /**
  * @link http://en.wikipedia.org/wiki/Representational_state_transfer
@@ -32,333 +34,290 @@ use Efficio\Http\Verb;
 class Router
 {
     /**
-     * model functions
+     * @var Request
      */
-    const FIND_ONE_BY_ID = 'findOneById';
-    const FIND_BY = 'findBy';
-    const CREATE_ONE = 'create';
-    const SAVE_ONE = 'save';
-    const GET_ID = 'getId';
+    private $request;
 
     /**
-     * base api url
-     * ie. /api/users/4
-     * @var string
+     * uri patter/regular expression to get model and id information
+     * @param string
      */
-    private $baseurl;
+    private $pattern = '/\/(?P<model>[A-Za-z]+)(\/?)(?P<id>[A-Za-z0-9]+)?/';
 
     /**
-     * requested url
-     * ie. /api/users/4
-     * @var string
-     */
-    private $url;
-
-    /**
-     * http method
-     * @var string
-     */
-    private $method;
-
-    /**
-     * raw request data
+     * associative array holding model's human name and their class name
      * @var array
-     */
-    private $data;
-
-    /**
-     * request parameters
-     * @var array
-     */
-    private $args;
-
-    /**
-     * plural model name
-     * @var string
-     */
-    private $model;
-
-    /**
-     * sigular model name
-     * @var string
-     */
-    private $smodel;
-
-    /**
-     * model id
-     * @var string
-     */
-    private $id;
-
-    /**
-     * restful models
-     * @string[]
      */
     private $models = [];
 
     /**
-     * internal function routing
-     * @param array
+     * request setter
+     * @param Request $req
      */
-    private static $internals = [
-        Verb::GET => [
-            true  => 'handlerFindOneById',
-            false => 'handlerFindBy',
-        ],
-
-        Verb::PUT => [
-            true  => 'handlerUpdate',
-            false => 'handlerCreate',
-        ],
-
-        Verb::POST => [
-            false => 'handlerCreate',
-        ],
-
-        Verb::DEL => [
-            true  => 'handlerDeleteOneById',
-            false => 'handlerDeleteBy',
-        ],
-    ];
-
-    /**
-     * default model functions
-     * @var array
-     */
-    private $modeldefaults = [
-        self::FIND_ONE_BY_ID => 'findOneById',
-        self::FIND_BY => 'findBy',
-        self::CREATE_ONE => 'create',
-        self::SAVE_ONE => 'save',
-        self::SAVE_ONE => 'getId',
-    ];
-
-    /**
-     * update default model functions
-     * @param array $update
-     */
-    public function modelFunction(array $update)
+    public function setRequest(Request $req)
     {
-        $this->modeldefaults = array_merge($this->modeldefaults, $update);
+        $this->request = $req;
     }
 
     /**
+     * request getter
+     * @return Request
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    /**
+     * set uri pattern string
+     * @param string $patt
+     */
+    public function setPattern($patt)
+    {
+        $this->pattern = $patt;
+    }
+
+    /**
+     * return uri pattern string
+     * @return string
+     */
+    public function getPattern()
+    {
+        return $this->pattern;
+    }
+
+    /**
+     * models setter. takes indexed and associative arrays
      * @param array $models
+     */
+    public function setModels(array $models)
+    {
+        foreach ($models as $name => $klass) {
+            // index or associative?
+            if (is_numeric($name)) {
+                $parts = explode('\\', $klass);
+                $name = array_pop($parts);
+                $name = self::pluralizeModel($name);
+            }
+
+            // cannot overwrite model
+            if (isset($this->models[ $name ])) {
+                throw new Exception(sprintf(
+                    'Cannot overwrite model %s(%s)', $name, $klass));
+            }
+
+            $this->models[ $name ] = $klass;
+        }
+    }
+
+    /**
+     * models getter
      * @return array
      */
-    public function serve(array $models)
+    public function getModels()
     {
-        foreach ($models as $key => $klass) {
-            // defined api name
-            if (!is_numeric($key)) {
-                $model = $key;
-            } else {
-                $nss = explode('\\', $klass);
-                $model = array_pop($nss);
-            }
-
-            if (isset($this->models[ $model ])) {
-                throw new \Exception(sprintf('Cannot redeclare api model %s',
-                    $model));
-            }
-
-            $model = strtolower($model);
-            $this->models[ $model ] = $klass;
-        }
-
         return $this->models;
     }
 
     /**
-     * @throws Exception
-     * @return mixed
+     * parse the model from the uri
+     * @return string
      */
-    public function route()
+    public function getModelName()
     {
-        $this->valid(true);
-        $hasid = strlen($this->id) !== 0;
-        $func = self::$internals[ $this->method ][ $hasid ];
-        return call_user_func([ $this, $func ]);
+        preg_match($this->pattern, $this->request->getUri(), $matches);
+        return isset($matches['model']) ? $matches['model'] : null;
     }
 
     /**
-     * @param boolean $throws
-     * @throws Exception
+     * parse the model id from the uri
+     * @return string
+     */
+    public function getModelId()
+    {
+        preg_match($this->pattern, $this->request->getUri(), $matches);
+        return isset($matches['id']) ? $matches['id'] : null;
+    }
+
+    /**
+     * model class getter
+     * @param string $model
+     * @return string
+     */
+    public function getModelClass($model)
+    {
+        return isset($this->models[ $model ]) ? $this->models[ $model ] : null;
+    }
+
+    /**
+     * checks if requested model is known
      * @return boolean
      */
-    public function valid($throws)
+    public function canHandleRequest()
     {
-        $valid = true;
-        $hasid = strlen($this->id) !== 0;
-
-        if (!isset($this->models[ $this->smodel ])) {
-            $valid = false;
-            if ($throws)
-                throw new \Exception(sprintf(
-                    'Invalid model: %s', $this->smodel));
-        } else if (!isset(self::$internals[ $this->method ][ $hasid ])) {
-            $valid = false;
-            if ($throws)
-                throw new \Exception(sprintf(
-                    'Invalid request: unknown internal route. Method: %s',
-                    $this->method));
-        }
-
-        return $valid;
+        return isset($this->models[ $this->getModelName() ]);
     }
 
     /**
-     * @param string $url
-     * @param string $baseurl
-     * @throws Exception
+     * parses request input
+     * @return array
      */
-    public function url($url, $baseurl = '')
+    public function getRequestData()
     {
-        $parts = explode('/', preg_replace('/^\//', '',
-            str_replace($baseurl, '', $url)));
-
-        switch (count($parts)) {
-            case 2:
-                list($model, $id) = $parts;
-                break;
-
-            case 1:
-                $model = $parts[0];
-                $id = '';
-                break;
-
-            default:
-                throw new \Exception(sprintf('Invalid url: %s', $url));
-        }
-
-        $this->id = $id;
-        $this->model = $model;
-        $this->smodel = $this->getModelSingularName($model);
-        $this->url = $url;
-        $this->baseurl = $baseurl;
+        $data = $this->request->getInput();
+        return is_string($data) ? json_decode($data, true) : $data;
     }
 
     /**
-     * @param string $method
-     * @throws Exception
-     */
-    public function method($method)
-    {
-        $methods = [ Verb::POST, Verb::GET, Verb::PUT, Verb::DEL ];
-
-        if (!in_array($method, $methods)) {
-            throw new \InvalidArgumentException(sprintf(
-                'Invalid method: %s, supported methods: %s',
-                $method, implode(', ', $methods)
-            ));
-        }
-
-        $this->method = $method;
-    }
-
-    /**
-     * @param array|string $data
-     */
-    public function data($data)
-    {
-        $this->data = is_string($data) ?
-                json_decode($data, true) : $data;
-    }
-
-    /**
-     * @param array $args
-     */
-    public function args(array $args)
-    {
-        $this->args = $args;
-    }
-
-    /**
-     * find one model by its id handler
-     * ie. /api/users/4 => User[id: 4]
-     * @throws Exception
+     * handle the request
      * @return mixed
      */
-    private function handlerFindBy()
+    public function handle()
     {
-        return call_user_func(
-            $this->getCallable($this->smodel, self::FIND_BY),
-            $this->data ?: []);
-    }
+        $method = '';
+        $model = $this->getModelName();
+        $id = $this->getModelId();
 
-    /**
-     * find one model by its id handler
-     * ie. /api/users/4 => User[id: 4]
-     * @throws Exception
-     * @return mixed
-     */
-    private function handlerFindOneById()
-    {
-        return call_user_func(
-            $this->getCallable($this->smodel, self::FIND_ONE_BY_ID), $this->id);
-    }
+        switch ($this->request->getMethod()) {
+            case Verb::GET:
+                $method = 'handleListModelsOrModel';
+                break;
 
-    /**
-     * create a new model. returns the model's id.
-     * @throws Exception
-     * @return string
-     */
-    private function handlerCreate()
-    {
-        $model = call_user_func(
-            $this->getCallable($this->smodel, self::CREATE_ONE), $this->data);
+            case Verb::PUT:
+                $method = 'handleCreateOrUpdateModel';
+                break;
 
-        if (call_user_func($this->getCallable($model, self::SAVE_ONE))) {
-            return call_user_func($this->getCallable($model, self::GET_ID));
-        }
-    }
+            case Verb::POST:
+                $method = 'handleCreateModel';
+                break;
 
-    /**
-     * update an existing model. returns the model
-     * @throws Exception
-     * @return string
-     */
-    private function handlerUpdate()
-    {
-        $model = call_user_func(
-            $this->getCallable($this->smodel, self::FIND_ONE_BY_ID), $this->id);
-
-        foreach ($this->data as $field => $value) {
-            $model->{ $field } = $value;
+            case Verb::DEL:
+                $method = 'handleDeleteModel';
+                break;
         }
 
-        if (call_user_func($this->getCallable($model, self::SAVE_ONE))) {
-            return $model;
-        }
+        return $this->{ $method }($this->getModelClass($model), $id);
     }
 
     /**
-     * users => user
-     * @param string $model
+     * request handler
+     *
+     * /api/users: List the URIs and perhaps other details of the collection's
+     * members
+     * /api/users/4: Retrieve a representation of the addressed member of the
+     * collection, expressed in an appropriate Internet media type.
+     *
+     * @see Verb::GET
+     * @param string $name
+     * @param string $id
      */
-    private function getModelSingularName($model)
+    protected function handleListModelsOrModel($model, $id)
     {
-        return preg_replace('/s$/', '', $model);
+        return $id ? $model::findOneById($id) :
+            $model::findBy($this->getRequestData());
     }
 
     /**
-     * @return array|string
+     * request handler
+     *
+     * /api/users: Replace the entire collection with another collection.
+     * [NOT HANDLED]
+     * /api/users/4: Replace the addressed member of the collection, or if it
+     * doesn't exist, create it.
+     *
+     * @see Verb::PUT
+     * @param string $name
+     * @param string $id
      */
-    private function getCallable($model, $func)
+    protected function handleCreateOrUpdateModel($model, $id)
     {
-        if (is_string($model)) {
-            $info = $this->models[ $model ];
+        return $id ? $this->handleUpdateModel($model, $id) :
+            $this->handleCreateModel($model);
+    }
 
-            if (is_array($info)) {
-                $funcs = array_merge($this->modeldefaults, $info[1]);
-                $model = $info[0];
-                $func = $funcs[ $func ];
-            } else {
-                $model = $info;
-                $func = $this->modeldefaults[ $func ];
+    /**
+     * request handler
+     *
+     * /api/users: Replace the entire collection with another collection.
+     * [NOT HANDLED]
+     * /api/users/4: Replace the addressed member of the collection, or if it
+     * doesn't exist, create it.
+     *
+     * @see Verb::PUT
+     * @param string $name
+     * @param string $id
+     */
+    protected function handleUpdateModel($model, $id)
+    {
+        $id = null;
+        $entity = $this->handleListModelsOrModel($model, $id);
+
+        if ($entity) {
+            foreach ($this->getRequestData() as $prop => $val) {
+                $entity->{ $prop } = $val;
             }
+
+            $entity->save();
+            $id = $entity->getId();
         }
 
-        return [ $model, $func ];
+        return $id;
+    }
+
+    /**
+     * request handler
+     *
+     * /api/users: Create a new entry in the collection. The new entry's URI is
+     * assigned automatically and is usually returned by the operation.
+     * /api/users/4: Not generally used. Treat the addressed member as a
+     * collection in its own right and create a new entry in it. [NOT HANDLED]
+     *
+     * @see Verb::POST
+     * @param string $name
+     */
+    protected function handleCreateModel($model)
+    {
+        $id = null;
+        $entity = $model::create($this->getRequestData());
+
+        if ($entity) {
+            $entity->save();
+            $id = $entity->getId();
+        }
+
+        return $id;
+    }
+
+    /**
+     * request handler
+     *
+     * /api/users: Delete the entire collection. [NOT HANDLED]
+     * /api/users/4: Delete the addressed member of the collection.
+     *
+     * @see Verb::DELETE
+     * @param string $name
+     * @param string $id
+     */
+    protected function handleDeleteModel($model, $id)
+    {
+        $ok = false;
+        $entity = $this->handleListModelsOrModel($model, $id);
+
+        if ($entity) {
+            $ok = $entity->delete();
+        }
+
+        return $ok;
+    }
+
+    /**
+     * convert a model name into its plural form. ie: user > uses
+     * @param string $name
+     * @return string
+     */
+    protected static function pluralizeModel($name)
+    {
+        // yup
+        return strtolower($name) . 's';
     }
 }

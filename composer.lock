@@ -11,12 +11,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minond/Http.git",
-                "reference": "c39cd25f65a14a066fe8745152fae640372e0d51"
+                "reference": "86df067c1b5dcb5bc44d1337bb12c7e2607a461d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minond/Http/zipball/c39cd25f65a14a066fe8745152fae640372e0d51",
-                "reference": "c39cd25f65a14a066fe8745152fae640372e0d51",
+                "url": "https://api.github.com/repos/minond/Http/zipball/86df067c1b5dcb5bc44d1337bb12c7e2607a461d",
+                "reference": "86df067c1b5dcb5bc44d1337bb12c7e2607a461d",
                 "shasum": ""
             },
             "require": {
@@ -36,7 +36,7 @@
                 }
             ],
             "description": "Http helpers",
-            "time": "2013-06-15 16:51:10"
+            "time": "2013-06-15 23:33:34"
         }
     ],
     "packages-dev": [
