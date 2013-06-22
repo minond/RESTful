@@ -165,6 +165,11 @@ class Router
     public function getRequestData()
     {
         $data = $this->request->getInput();
+
+        if (is_null($data) || !strlen($data)) {
+            $data = [];
+        }
+
         return is_string($data) ? json_decode($data, true) : $data;
     }
 
