@@ -87,43 +87,114 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->router->setModels($models);
     }
 
-    public function testModelNameCanBeParsed()
+    public function testModelNameCanBeParsedUsingEmptyUri()
     {
         $req = new Request;
         $this->router->setRequest($req);
 
         $req->setUri('/');
         $this->assertNull($this->router->getModelName(), '/');
+    }
+
+    public function testModelNameCanBeParsedUsingJustAModelName()
+    {
+        $req = new Request;
+        $this->router->setRequest($req);
 
         $req->setUri('/users');
         $this->assertEquals('users', $this->router->getModelName(), '/users');
+    }
+
+    public function testModelNameCanBeParsedUsingJustAModelNameAndASlashAtTheEnd()
+    {
+        $req = new Request;
+        $this->router->setRequest($req);
 
         $req->setUri('/users/');
         $this->assertEquals('users', $this->router->getModelName(), '/users/');
+    }
+
+    public function testModelNameCanBeParsedUsingJustAModelNameAndAModelId()
+    {
+        $req = new Request;
+        $this->router->setRequest($req);
 
         $req->setUri('/users/123');
         $this->assertEquals('users', $this->router->getModelName(), '/users/123');
     }
 
-    public function testModelIdCanBeParsed()
+    public function testModelNameCanBeParsedUsingJustAModelNameAndAModelIdWithASlashAtTheEnd()
+    {
+        $req = new Request;
+        $this->router->setRequest($req);
+
+        $req->setUri('/users/123/');
+        $this->assertEquals('users', $this->router->getModelName(), '/users/123/');
+    }
+
+    public function testModelNameCanBeSet()
+    {
+        $req = new Request;
+        $this->router->setRequest($req);
+
+        $req->setUri('/invalid/123');
+        $this->router->setModelName('users');
+        $this->assertEquals('users', $this->router->getModelName());
+    }
+
+    public function testModelIdCanBeParsedUsingAnEmptyUri()
     {
         $req = new Request;
         $this->router->setRequest($req);
 
         $req->setUri('/');
         $this->assertNull($this->router->getModelId(), '/');
+    }
+
+    public function testModelIdCanBeParsedUsingJustAModelName()
+    {
+        $req = new Request;
+        $this->router->setRequest($req);
 
         $req->setUri('/users');
         $this->assertNull($this->router->getModelId(), '/users');
+    }
+
+    public function testModelIdCanBeParsedUsingJustAModelNameAndASlashAtTheEnd()
+    {
+        $req = new Request;
+        $this->router->setRequest($req);
 
         $req->setUri('/users/');
         $this->assertNull($this->router->getModelId(), '/users/');
+    }
+
+    public function testModelIdCanBeParsedUsingJustAModelNameAndAModelId()
+    {
+        $req = new Request;
+        $this->router->setRequest($req);
 
         $req->setUri('/users/123');
         $this->assertEquals('123', $this->router->getModelId(), '/users/123');
+    }
+
+    public function testModelIdCanBeParsedUsingJustAModelNameAndAModelIdAndExtraContentAtTheEnd()
+    {
+        $req = new Request;
+        $this->router->setRequest($req);
 
         $req->setUri('/users/123/more');
         $this->assertEquals('123', $this->router->getModelId(), '/users/123/more');
+    }
+
+    public function testModelIdsCanBeSet()
+    {
+        $req = new Request;
+        $this->router->setRequest($req);
+
+        $req->setUri('/users/invalid');
+        $this->router->setModelId('123');
+        $this->assertEquals('123', $this->router->getModelId());
     }
 
     public function testHandleChecker()
@@ -158,6 +229,15 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->router->setRequest($req);
         $this->assertEquals($expected, $this->router->getRequestData());
+    }
+
+    public function testEmptyInputsAreTreatedAsEmptyArrays()
+    {
+        $req = new Request;
+        $req->setInput('');
+
+        $this->router->setRequest($req);
+        $this->assertEquals([], $this->router->getRequestData());
     }
 
     public function testPluralizeFunction()

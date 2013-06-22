@@ -51,6 +51,18 @@ class Router
     private $models = [];
 
     /**
+     * name of the model we're working with
+     * @var string
+     */
+    private $modelname = false;
+
+    /**
+     * id of the model we're working with
+     * @var string
+     */
+    private $modelid = false;
+
+    /**
      * request setter
      * @param Request $req
      */
@@ -120,13 +132,35 @@ class Router
     }
 
     /**
+     * model name setter
+     * @param string $name
+     */
+    public function setModelName($name)
+    {
+        $this->modelname = $name;
+    }
+
+    /**
      * parse the model from the uri
      * @return string
      */
     public function getModelName()
     {
-        preg_match($this->pattern, $this->request->getUri(), $matches);
-        return isset($matches['model']) ? $matches['model'] : null;
+        if ($this->modelname === false) {
+            preg_match($this->pattern, $this->request->getUri(), $matches);
+            $this->modelname = isset($matches['model']) ? $matches['model'] : null;
+        }
+
+        return $this->modelname;
+    }
+
+    /**
+     * model id setter
+     * @param string $id
+     */
+    public function setModelId($id)
+    {
+        $this->modelid = $id;
     }
 
     /**
@@ -135,8 +169,12 @@ class Router
      */
     public function getModelId()
     {
-        preg_match($this->pattern, $this->request->getUri(), $matches);
-        return isset($matches['id']) ? $matches['id'] : null;
+        if ($this->modelid === false) {
+                preg_match($this->pattern, $this->request->getUri(), $matches);
+                $this->modelid = isset($matches['id']) ? $matches['id'] : null;
+        }
+
+        return $this->modelid;
     }
 
     /**
