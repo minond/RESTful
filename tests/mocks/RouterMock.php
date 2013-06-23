@@ -10,6 +10,7 @@ class RouterMock extends Router
     public $handle_update_model_called = false;
     public $handle_create_model_called = false;
     public $handle_delete_model_called = false;
+    public $handle_meta_called = false;
 
     protected function handleListModelsOrModel($model, $id)
     {
@@ -29,6 +30,11 @@ class RouterMock extends Router
     protected function handleDeleteModel($model, $id)
     {
         $this->handle_delete_model_called = true;
+    }
+
+    protected function handleMeta($model)
+    {
+        $this->handle_meta_called = true;
     }
 
     public static function callPluralizeModel($name)

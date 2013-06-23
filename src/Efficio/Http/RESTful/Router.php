@@ -63,6 +63,12 @@ class Router
     private $modelid = false;
 
     /**
+     * this is a meta request
+     * @var boolean
+     */
+    private $meta = false;
+
+    /**
      * request setter
      * @param Request $req
      */
@@ -96,6 +102,24 @@ class Router
     public function getPattern()
     {
         return $this->pattern;
+    }
+
+    /**
+     * meta flag setter
+     * @param boolean $meta
+     */
+    public function setMeta($meta)
+    {
+        $this->meta = $meta;
+    }
+
+    /**
+     * meta flag getter
+     * @return boolean
+     */
+    public function getMeta()
+    {
+        return $this->meta;
     }
 
     /**
@@ -221,25 +245,55 @@ class Router
         $model = $this->getModelName();
         $id = $this->getModelId();
 
-        switch ($this->request->getMethod()) {
-            case Verb::GET:
-                $method = 'handleListModelsOrModel';
-                break;
+        if ($this->getMeta()) {
+            $method = 'handleMeta';
+        } else {
+            switch ($this->request->getMethod()) {
+                case Verb::GET:
+                    $method = 'handleListModelsOrModel';
+                    break;
 
-            case Verb::PUT:
-                $method = 'handleCreateOrUpdateModel';
-                break;
+                case Verb::PUT:
+                    $method = 'handleCreateOrUpdateModel';
+                    break;
 
-            case Verb::POST:
-                $method = 'handleCreateModel';
-                break;
+                case Verb::POST:
+                    $method = 'handleCreateModel';
+                    break;
 
-            case Verb::DEL:
-                $method = 'handleDeleteModel';
-                break;
+                case Verb::DEL:
+                    $method = 'handleDeleteModel';
+                    break;
+            }
         }
 
         return $this->{ $method }($this->getModelClass($model), $id);
+    }
+
+    /**
+     * request handler
+     *
+     * meta data getter
+     *
+     * @param string $model
+     * @return array
+     */
+    protected function handleMeta($model)
+    {
+        $entity = json_decode(json_encode($model::create([])), true);
+        $meta = [
+            'class' => $model,
+            'fields' => [],
+        ];
+
+        foreach ($entity as $field => $value) {
+            $meta['fields'][] = [
+                'field' => $field,
+                'type' => gettype($value),
+            ];
+        }
+
+        return $meta;
     }
 
     /**

@@ -36,6 +36,17 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($pattern, $this->router->getPattern());
     }
 
+    public function testMetaFlagIsOffByDefault()
+    {
+        $this->assertFalse($this->router->getMeta());
+    }
+
+    public function testMetaFlagGeterAndSetter()
+    {
+        $this->router->setMeta(true);
+        $this->assertTrue($this->router->getMeta());
+    }
+
     public function testModelsSetterUsingAnAssociativeArray()
     {
         $models = [
@@ -274,6 +285,17 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $req->setMethod(Verb::DEL);
         $rou->handle();
         $this->assertTrue($rou->handle_delete_model_called);
+    }
+
+    public function testMetaRequestIsRoutedCorrectly()
+    {
+        $req = new Request;
+        $rou = new RouterMock;
+        $rou->setRequest($req);
+        $req->setMethod(Verb::GET);
+        $rou->setMeta(true);
+        $rou->handle();
+        $this->assertTrue($rou->handle_meta_called);
     }
 
     public function testPutMethodWithAnIdTriggersUpdateHandler()
