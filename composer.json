@@ -11,20 +11,18 @@
 
     "require": {
         "php": ">=5.4.0",
+        "minond/utilitatis": "dev-master",
         "minond/http": "dev-master"
     },
 
     "require-dev": {
-        "satooshi/php-coveralls": "dev-master"
+        "satooshi/php-coveralls": "dev-master",
+        "minond/model": "dev-master"
     },
 
     "autoload": {
         "psr-0": {
             "Efficio": "src/"
         }
-    },
-
-    "require-dev": {
-        "minond/model": "dev-master"
     }
 }
