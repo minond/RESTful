@@ -1,6 +1,7 @@
 {
     "name": "minond/restful",
     "description": "RESTful router",
+    "license": "GPL-2.0+",
 
     "authors": [
         {
@@ -11,13 +12,13 @@
 
     "require": {
         "php": ">=5.4.0",
-        "minond/utilitatis": "dev-master",
-        "minond/http": "dev-master"
+        "minond/utilitatis": "1.0.*",
+        "minond/http": "1.0.*"
     },
 
     "require-dev": {
         "satooshi/php-coveralls": "dev-master",
-        "minond/model": "dev-master"
+        "minond/model": "1.0.*"
     },
 
     "autoload": {
