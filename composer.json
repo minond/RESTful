@@ -12,8 +12,8 @@
 
     "require": {
         "php": ">=5.4.0",
-        "minond/utilitatis": "1.0.*",
-        "minond/http": "1.0.*"
+        "minond/utilitatis": "1.*",
+        "minond/http": "1.*"
     },
 
     "require-dev": {
