@@ -69,6 +69,17 @@ class Router
     private $meta = false;
 
     /**
+     * maps which an http verb to a handler function
+     * @var array
+     */
+    protected static $verb_method_map = [
+        Verb::GET => 'handleListModelsOrModel',
+        Verb::PUT => 'handleCreateOrUpdateModel',
+        Verb::POST => 'handleCreateModel',
+        Verb::DEL => 'handleDeleteModel',
+    ];
+
+    /**
      * request setter
      * @param Request $req
      */
@@ -241,33 +252,11 @@ class Router
      */
     public function handle()
     {
-        $method = '';
-        $model = $this->getModelName();
-        $id = $this->getModelId();
+        $method = $this->getMeta() ? 'handleMeta' :
+            static::$verb_method_map[ $this->request->getMethod() ];
 
-        if ($this->getMeta()) {
-            $method = 'handleMeta';
-        } else {
-            switch ($this->request->getMethod()) {
-                case Verb::GET:
-                    $method = 'handleListModelsOrModel';
-                    break;
-
-                case Verb::PUT:
-                    $method = 'handleCreateOrUpdateModel';
-                    break;
-
-                case Verb::POST:
-                    $method = 'handleCreateModel';
-                    break;
-
-                case Verb::DEL:
-                    $method = 'handleDeleteModel';
-                    break;
-            }
-        }
-
-        return $this->{ $method }($this->getModelClass($model), $id);
+        return $this->{ $method }($this->getModelClass($this->getModelName()),
+            $this->getModelId());
     }
 
     /**
