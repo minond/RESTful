@@ -1,0 +1,23 @@
+imports:
+  - php
+
+filter:
+  excluded_paths:
+    - 'vendor/*'
+    - 'app/*'
+    - 'web/*'
+
+before_commands:
+  - 'composer install --prefer-source --dev'
+
+tools:
+  php_code_coverage: false
+  php_cpd: true
+  php_pdepend: true
+  php_mess_detector: true
+  php_cs_fixer: true
+  php_analyzer: true
+  php_code_sniffer: true
+  php_loc: true
+  sensiolabs_security_checker: true
+
