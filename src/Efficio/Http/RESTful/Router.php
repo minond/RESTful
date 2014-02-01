@@ -335,7 +335,6 @@ class Router
      */
     protected function handleUpdateModel($model, $id)
     {
-        $id = null;
         $entity = $this->handleListModelsOrModel($model, $id);
 
         if ($entity) {
